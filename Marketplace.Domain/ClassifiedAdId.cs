@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
+using Marketplace.Framework;
 
 namespace Marketplace.Domain
 {
-    public class ClassifiedAdId
+    public class ClassifiedAdId : Value 
     {
         private readonly Guid _value;
 
@@ -14,6 +16,11 @@ namespace Marketplace.Domain
             }
 
             _value = value; 
-        } 
+        }
+
+        protected override IEnumerable<object> GetAtomicValues()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

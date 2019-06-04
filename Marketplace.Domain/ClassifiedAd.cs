@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
+using Marketplace.Framework;
 
 namespace Marketplace.Domain
 {
-    public class ClassifiedAd
+    public class ClassifiedAd : Value
     {
         public ClassifiedAdId Id { get; private set; }
 
@@ -16,7 +18,12 @@ namespace Marketplace.Domain
 
         public void SetTitle(string title) => _title = title; 
         public void UpdateText(string text) => _text = text; 
-        public void UpdatePrice(decimal price) => _price = price; 
+        public void UpdatePrice(decimal price) => _price = price;
+
+        protected override IEnumerable<object> GetAtomicValues()
+        {
+            yield return Id; 
+        }
 
         private UserId _ownerId;
         private string _title; 

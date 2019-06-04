@@ -15,6 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Marketplace.Domain\Marketplace.Domain.csproj" />
+    <ProjectReference Include="..\Marketplace.Framework\Marketplace.Framework.csproj" />
   </ItemGroup>
 
 </Project>
