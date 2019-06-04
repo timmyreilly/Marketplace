@@ -1,5 +1,9 @@
 # Domain Driven Design Practice
 
+# Learning snippets: 
+
+Add a reference to your project, if you need to test your class library in your tests project: 
+`dotnet add reference ..\Marketplace.Domain` 
 
 # Notes: 
 
