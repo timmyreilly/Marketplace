@@ -41,6 +41,24 @@ namespace Marketplace.Tests
             Assert.Throws<InvalidEntityStateException>(() => _classifiedAd.RequestToPublish()); 
         }
 
-        
+        [Fact]
+        public void Cannot_public_with_text() 
+        {
+            _classifiedAd.SetTitle(ClassifiedAdTitle.FromString("Test ad")); 
+            _classifiedAd.UpdatePrice(Price.FromDecimal(100.10m, "EUR", new FakeCurrencyLookup())); 
+
+            Assert.Throws<InvalidEntityStateException>(() => _classifiedAd.RequestToPublish()); 
+        }
+
+        [Fact]
+        public void Cannot_publish_without_price() 
+        {
+            _classifiedAd.SetTitle(ClassifiedAdTitle.FromString("Test ad")); 
+            _classifiedAd.UpdateText(ClassifiedAdText.FromString("HOLA")); 
+
+            Assert.Throws<InvalidEntityStateException>(() => _classifiedAd.RequestToPublish()); 
+        }
+
+
     }
 }
