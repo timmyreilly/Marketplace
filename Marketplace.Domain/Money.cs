@@ -18,12 +18,15 @@ namespace Marketplace.Domain
 
 
         // These are factory methods: 
-        public static Money FromDecimal(decimal amount, string currency = DefaultCurrency) => new Money(amount, currency);
-        public static Money FromString(string amount, string currency = DefaultCurrency) => new Money(decimal.Parse(amount), currency);
+        // public static Money FromDecimal(decimal amount, string currency = DefaultCurrency) => new Money(amount, currency);
+        // public static Money FromString(string amount, string currency = DefaultCurrency) => new Money(decimal.Parse(amount), currency);
 
         // These are our factory methods using our currency service: 
         public static Money FromDecimal(decimal amount, string currency, ICurrencyLookup currencyLookup) =>
             new Money(amount, currency, currencyLookup);
+
+        public static Money FromString(string amount, string currency, ICurrencyLookup currencyLookup) => 
+            new Money(decimal.Parse(amount), currency, currencyLookup); 
         // protected Money(decimal amount, string currencyCode = "EUR")  
         // {
         //     if (decimal.Round(amount, 2) != amount) 
@@ -58,14 +61,14 @@ namespace Marketplace.Domain
             Currency = currency;
         }
 
-        private Money(decimal amount, CurrencyDetails currency)
+        protected Money(decimal amount, Currency currency)
         {
             Amount = amount;
             Currency = currency;
         }
 
         public decimal Amount { get; }
-        public CurrencyDetails Currency { get; }
+        public Currency Currency { get; }
 
 
         // public Money Add(Money summand) => new Money(Amount + summand.Amount); 

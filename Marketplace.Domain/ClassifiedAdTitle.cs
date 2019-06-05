@@ -15,7 +15,7 @@ namespace Marketplace.Domain
         {
             if (value.Length > 100) 
             {
-                throw new ArgumentOutOfRangeException("Title cannot be longer than 100 characters", nameof(title)); 
+                throw new ArgumentOutOfRangeException("Title cannot be longer than 100 characters", nameof(value)); 
             }
 
             _value = value; 
