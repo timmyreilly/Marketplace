@@ -22,5 +22,7 @@ namespace Marketplace.Domain
         {
             throw new NotImplementedException();
         }
+
+        public static implicit operator Guid(ClassifiedAdId self) => self._value; 
     }
 }

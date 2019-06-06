@@ -4,7 +4,7 @@ using Marketplace.Framework;
 
 namespace Marketplace.Domain
 {
-    public class ClassifiedAd : Value
+    public class ClassifiedAd : Entity
     {
         public ClassifiedAdId Id { get; private set; }
 
@@ -14,6 +14,12 @@ namespace Marketplace.Domain
             OwnerId = ownerId;
             State = ClassifiedAdState.Inactive;
             EnsureValidState();
+
+            Raise(new Events.ClassifiedAdCreated
+            {
+                Id = id, 
+                OwnerId = ownerId
+            }); 
         }
 
         // making the implicit explicit! Refactoring the argument exceptions into value objects. 
@@ -24,6 +30,12 @@ namespace Marketplace.Domain
         {
             Title = title;
             EnsureValidState();
+
+            Raise(new Events.ClassifiedAdTitleChanged
+            {
+                Id = Id, 
+                Title = title 
+            }); 
         }
         public void UpdateTextOld(ClassifiedAdText text) => Text = text;
 
