@@ -1,10 +1,23 @@
+using System.Threading.Tasks;
+using Marketplace.Domain;
+using Marketplace.Framework;
+
 namespace Marketplace.Api
 {
-    public class ClassifiedAdsApplicationService
+    public class ClassifiedAdsApplicationService : IApplicationService
     {
-        public void Handle(Contracts.ClassifiedAds.V1.Create command)
+        private readonly IEntityStore _store; 
+        private ICurrencyLookup _currencyLookup; 
+
+        public ClassifiedAdsApplicationService(IEntityStore store, ICurrencyLookup currencyLookup)
         {
-            // we need to create a new classified ad here 
+            _store = store; 
+            _currencyLookup = currencyLookup; 
+        }
+
+        public Task Handle(object command)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
