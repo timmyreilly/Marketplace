@@ -7,52 +7,93 @@ namespace Marketplace.Domain
     public class ClassifiedAd : Entity
     {
         public ClassifiedAdId Id { get; private set; }
+        public UserId OwnerId { get; private set; }
+        public ClassifiedAdTitle Title { get; private set; }
+        public ClassifiedAdText Text { get; private set; }
+        public Price Price { get; private set; }
+        public ClassifiedAdState State { get; private set; }
+        public UserId ApprovedBy { get; private set; }
 
-        public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
-        {
-            Id = id;
-            OwnerId = ownerId;
-            State = ClassifiedAdState.Inactive;
-            EnsureValidState();
+        // public ClassifiedAd(ClassifiedAdId id, UserId ownerId)
+        // {
+        //     Id = id;
+        //     OwnerId = ownerId;
+        //     State = ClassifiedAdState.Inactive;
+        //     EnsureValidState();
 
-            Raise(new Events.ClassifiedAdCreated
+        //     Raise(new Events.ClassifiedAdCreated
+        //     {
+        //         Id = id,
+        //         OwnerId = ownerId
+        //     });
+        // }
+
+        public ClassifiedAd(ClassifiedAdId id, UserId ownerId) =>
+            Apply(new Events.ClassifiedAdCreated
             {
-                Id = id, 
+                Id = id,
                 OwnerId = ownerId
-            }); 
-        }
+            });
+
+        public void SetTitle(ClassifiedAdTitle title) =>
+            Apply(new Events.ClassifiedAdTitleChanged
+            {
+                Id = Id,
+                Title = title
+            });
 
         // making the implicit explicit! Refactoring the argument exceptions into value objects. 
 
-        public void SetTitleOld(ClassifiedAdTitle title) => Title = title;
 
-        public void SetTitle(ClassifiedAdTitle title)
-        {
-            Title = title;
-            EnsureValidState();
+        // public void SetTitle(ClassifiedAdTitle title)
+        // {
+        //     Title = title;
+        //     EnsureValidState();
 
-            Raise(new Events.ClassifiedAdTitleChanged
+        //     Raise(new Events.ClassifiedAdTitleChanged
+        //     {
+        //         Id = Id,
+        //         Title = title
+        //     });
+        // }
+
+        public void SetTitleOld(ClassifiedAdTitle title) =>
+            Apply(new Events.ClassifiedAdTitleChanged
             {
-                Id = Id, 
-                Title = title 
-            }); 
-        }
-        public void UpdateTextOld(ClassifiedAdText text) => Text = text;
+                Id = Id,
+                Title = title
+            });
+        public void SetTitleOlder(ClassifiedAdTitle title) => Title = title;
 
-        public void UpdateText(ClassifiedAdText text)
+        public void UpdateText(ClassifiedAdText text) =>
+        Apply(new Events.ClassifiedAdTextUpdated
         {
-            Text = text; 
-            EnsureValidState(); 
-        }
-        public void UpdatePriceOld(Price price) => Price1 = price;
+            Id = Id,
+            AdText = text // This is implementation details! This is where bugs show up. Or that's what I'm assuming. 
+        });
 
-        public void UpdatePrice(Price price) 
+        public void UpdateTextOld(ClassifiedAdText text)
         {
-            Price1 = price; 
-            EnsureValidState(); 
+            Text = text;
+            EnsureValidState();
+        }
+        public void UpdateTextOlder(ClassifiedAdText text) => Text = text;
+
+        public void UpdatePrice(Price price) =>
+            Apply(new Events.ClassifiedAdPriceUpdated
+            {
+                Id = Id,
+                Price = price.Amount,
+                CurrencyCode = price.Currency.CurrencyCode
+            });
+        public void UpdatePriceOlder(Price price) => Price = price;
+        public void UpdatePriceOld(Price price)
+        {
+            Price = price;
+            EnsureValidState();
         }
 
-        public void RequestToPublish()
+        public void RequestToPublishOld()
         {
             if (Title == null)
             {
@@ -63,7 +104,7 @@ namespace Marketplace.Domain
             {
                 throw new InvalidEntityStateException(this, "text cannot be empty");
             }
-            if (Price1?.Amount == 0)
+            if (Price?.Amount == 0)
             {
                 throw new InvalidEntityStateException(this, "price cannot be zero");
             }
@@ -74,7 +115,35 @@ namespace Marketplace.Domain
             EnsureValidState();
         }
 
-        private void EnsureValidState()
+        public void RequestToPublish() =>
+            Apply(new Events.ClassifiedAdSentForReview { Id = Id });
+
+        protected override void When(object @event)
+        {
+            switch (@event)
+            {
+                case Events.ClassifiedAdCreated e:
+                    Id = new ClassifiedAdId(e.Id);
+                    OwnerId = new UserId(e.OwnerId);
+                    State = ClassifiedAdState.Inactive;
+                    // This is Jaw dropping. 
+                    break;
+                case Events.ClassifiedAdTitleChanged e:
+                    Title = new ClassifiedAdTitle(e.Title);
+                    break;
+                case Events.ClassifiedAdTextUpdated e:
+                    Text = new ClassifiedAdText(e.AdText);
+                    break;
+                case Events.ClassifiedAdPriceUpdated e:
+                    Price = new Price(e.Price, e.CurrencyCode);
+                    break;
+                case Events.ClassifiedAdSentForReview e:
+                    State = ClassifiedAdState.PendingReview;
+                    break;
+            }
+        }
+
+        protected override void EnsureValidState()
         {
             bool valid = Id != null && OwnerId != null;
 
@@ -84,13 +153,13 @@ namespace Marketplace.Domain
                     valid = valid
                         && Title != null
                         && Text != null
-                        && Price1?.Amount > 0;
+                        && Price?.Amount > 0;
                     break;
                 case ClassifiedAdState.Active:
                     valid = valid
                         && Title != null
                         && Text != null
-                        && Price1?.Amount > 0
+                        && Price?.Amount > 0
                         && ApprovedBy != null;
                     break;
             }
@@ -102,18 +171,6 @@ namespace Marketplace.Domain
 
 
         }
-
-        protected override IEnumerable<object> GetAtomicValues()
-        {
-            yield return Id;
-        }
-
-        public UserId OwnerId { get; }
-        public ClassifiedAdTitle Title { get; private set; }
-        public ClassifiedAdText Text { get; private set; }
-        public Price Price1 { get; private set; }
-        public ClassifiedAdState State { get; private set; }
-        public UserId ApprovedBy { get; private set; }
 
         public enum ClassifiedAdState
         {
